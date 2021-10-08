@@ -6,7 +6,6 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
     var totalAmount = 0
     var volumeCredits = 0
     var result = "Statement for ${invoice.customer}\n"
-    val format = NumberFormat.getCurrencyInstance(Locale.US)
 
     for(perf in invoice.performances) {
         val play = plays.find { it.id == perf.playID } ?:
@@ -15,13 +14,15 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
         // add volume credits
         volumeCredits += volumeCreditsFor(perf, play)
         // print line for this order
-        result += " ${play.name}: ${format.format(thisAmount / 100)} (${perf.audience} seats)\n"
+        result += " ${play.name}: ${asUSD(thisAmount)} (${perf.audience} seats)\n"
         totalAmount += thisAmount
     }
-    result += "Amount owed is ${format.format(totalAmount / 100)}\n"
+    result += "Amount owed is ${asUSD(totalAmount)}\n"
     result += "You earned $volumeCredits credits\n"
     return result
 }
+
+private fun asUSD(thisAmount: Int): String? = NumberFormat.getCurrencyInstance(Locale.US).format(thisAmount / 100)
 
 private fun volumeCreditsFor(perf: Performance, play: Play): Int {
     var result = max(perf.audience - 30, 0)
