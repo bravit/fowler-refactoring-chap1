@@ -9,6 +9,12 @@ data class StatementLine(val playName: String, val amount: Int,
     }
 }
 
+data class StatementData(val customer: String,
+                         val statementLines: List<StatementLine>) {
+    val volumeCredits = statementLines.sumOf { it.volumeCredits }
+    val totalAmount = statementLines.sumOf { it.amount }
+}
+
 fun statement(invoice: Invoice, plays: List<Play>): String {
     fun findPlay(perf: Performance): Play {
         return plays.find { it.id == perf.playID } ?:
@@ -22,18 +28,15 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
             volumeCreditsFor(perf, play), perf.audience
         )
     }
+    val statementData = StatementData(invoice.customer,
+        invoice.performances.map(::statementLine))
 
-    val statementLines = invoice.performances.map(::statementLine)
-
-    val volumeCredits = statementLines.sumOf { it.volumeCredits }
-    val totalAmount = statementLines.sumOf { it.amount }
-
-    val result = StringBuilder("Statement for ${invoice.customer}\n")
-    statementLines.forEach {
+    val result = StringBuilder("Statement for ${statementData.customer}\n")
+    statementData.statementLines.forEach {
         result.appendLine(it)
     }
-    result.append("Amount owed is ${asUSD(totalAmount)}\n")
-    result.append("You earned $volumeCredits credits\n")
+    result.append("Amount owed is ${asUSD(statementData.totalAmount)}\n")
+    result.append("You earned ${statementData.volumeCredits} credits\n")
     return result.toString()
 }
 
