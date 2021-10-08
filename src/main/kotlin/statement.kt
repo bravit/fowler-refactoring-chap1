@@ -11,7 +11,7 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
     for(perf in invoice.performances) {
         val play = plays.find { it.id == perf.playID } ?:
             throw Exception("Unknown play: ${perf.playID}")
-        var thisAmount = 0
+        var thisAmount: Int
         when (play.type) {
             "tragedy" -> {
                 thisAmount = 40000
@@ -24,7 +24,7 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
                 if (perf.audience > 20) {
                     thisAmount += 10000 + 500 * (perf.audience - 20)
                 }
-                thisAmount += 300 * perf.audience;
+                thisAmount += 300 * perf.audience
             }
             else -> throw Exception("Unknown type: ${play.type}")
         }
@@ -38,6 +38,6 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
         totalAmount += thisAmount
     }
     result += "Amount owed is ${format.format(totalAmount / 100)}\n"
-    result += "You earned ${volumeCredits} credits\n"
+    result += "You earned $volumeCredits credits\n"
     return result
 }
