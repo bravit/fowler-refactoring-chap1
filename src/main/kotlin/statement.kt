@@ -10,12 +10,20 @@ data class StatementLine(val playName: String, val amount: Int,
 }
 
 fun statement(invoice: Invoice, plays: List<Play>): String {
-    val statementLines = invoice.performances.map {perf ->
-        val play = plays.find { it.id == perf.playID } ?:
-        throw Exception("Unknown play: ${perf.playID}")
-        StatementLine(play.name, amountFor(perf, play),
-            volumeCreditsFor(perf, play), perf.audience)
+    fun findPlay(perf: Performance): Play {
+        return plays.find { it.id == perf.playID } ?:
+            throw Exception("Unknown play: ${perf.playID}")
     }
+
+    fun statementLine(perf: Performance): StatementLine {
+        val play = findPlay(perf)
+        return StatementLine(
+            play.name, amountFor(perf, play),
+            volumeCreditsFor(perf, play), perf.audience
+        )
+    }
+
+    val statementLines = invoice.performances.map(::statementLine)
 
     val volumeCredits = statementLines.sumOf { it.volumeCredits }
     val totalAmount = statementLines.sumOf { it.amount }
