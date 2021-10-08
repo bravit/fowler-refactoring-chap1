@@ -10,22 +10,23 @@ data class StatementLine(val playName: String, val amount: Int,
 }
 
 fun statement(invoice: Invoice, plays: List<Play>): String {
-    var totalAmount = 0
-    var volumeCredits = 0
-    var result = "Statement for ${invoice.customer}\n"
-
-    for(perf in invoice.performances) {
+    val statementLines = invoice.performances.map {perf ->
         val play = plays.find { it.id == perf.playID } ?:
-            throw Exception("Unknown play: ${perf.playID}")
-        val statementLine = StatementLine(play.name, amountFor(perf, play),
-                                          volumeCreditsFor(perf, play), perf.audience)
-        volumeCredits += statementLine.volumeCredits
-        result += "$statementLine\n"
-        totalAmount += statementLine.amount
+        throw Exception("Unknown play: ${perf.playID}")
+        StatementLine(play.name, amountFor(perf, play),
+            volumeCreditsFor(perf, play), perf.audience)
     }
-    result += "Amount owed is ${asUSD(totalAmount)}\n"
-    result += "You earned $volumeCredits credits\n"
-    return result
+
+    val volumeCredits = statementLines.sumOf { it.volumeCredits }
+    val totalAmount = statementLines.sumOf { it.amount }
+
+    val result = StringBuilder("Statement for ${invoice.customer}\n")
+    statementLines.forEach {
+        result.appendLine(it)
+    }
+    result.append("Amount owed is ${asUSD(totalAmount)}\n")
+    result.append("You earned $volumeCredits credits\n")
+    return result.toString()
 }
 
 private fun asUSD(thisAmount: Int): String? = NumberFormat.getCurrencyInstance(Locale.US).format(thisAmount / 100)
