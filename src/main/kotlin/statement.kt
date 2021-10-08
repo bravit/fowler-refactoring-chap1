@@ -13,16 +13,21 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
             throw Exception("Unknown play: ${perf.playID}")
         val thisAmount = amountFor(perf, play)
         // add volume credits
-        volumeCredits += max(perf.audience - 30, 0)
-        // add extra credit for every ten comedy attendees
-        if (play.type == PlayType.COMEDY)
-            volumeCredits += floor(perf.audience / 5.0).toInt()
+        volumeCredits += volumeCreditsFor(perf, play)
         // print line for this order
         result += " ${play.name}: ${format.format(thisAmount / 100)} (${perf.audience} seats)\n"
         totalAmount += thisAmount
     }
     result += "Amount owed is ${format.format(totalAmount / 100)}\n"
     result += "You earned $volumeCredits credits\n"
+    return result
+}
+
+private fun volumeCreditsFor(perf: Performance, play: Play): Int {
+    var result = max(perf.audience - 30, 0)
+    // add extra credit for every five comedy attendees
+    if (play.type == PlayType.COMEDY)
+        result += floor(perf.audience / 5.0).toInt()
     return result
 }
 
