@@ -16,9 +16,13 @@ data class StatementData(val customer: String,
 }
 
 fun statement(invoice: Invoice, plays: List<Play>): String {
+    val statementData = statementData(invoice, plays)
+    return renderToPlainText(statementData)
+}
+
+private fun statementData(invoice: Invoice, plays: List<Play>): StatementData {
     fun findPlay(perf: Performance): Play {
-        return plays.find { it.id == perf.playID } ?:
-            throw Exception("Unknown play: ${perf.playID}")
+        return plays.find { it.id == perf.playID } ?: throw Exception("Unknown play: ${perf.playID}")
     }
 
     fun statementLine(perf: Performance): StatementLine {
@@ -28,9 +32,14 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
             volumeCreditsFor(perf, play), perf.audience
         )
     }
-    val statementData = StatementData(invoice.customer,
-        invoice.performances.map(::statementLine))
 
+    return StatementData(
+        invoice.customer,
+        invoice.performances.map(::statementLine)
+    )
+}
+
+private fun renderToPlainText(statementData: StatementData): String {
     val result = StringBuilder("Statement for ${statementData.customer}\n")
     statementData.statementLines.forEach {
         result.appendLine(it)
