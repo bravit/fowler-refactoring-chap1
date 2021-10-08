@@ -11,22 +11,7 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
     for(perf in invoice.performances) {
         val play = plays.find { it.id == perf.playID } ?:
             throw Exception("Unknown play: ${perf.playID}")
-        var thisAmount: Int
-        when (play.type) {
-            PlayType.TRAGEDY -> {
-                thisAmount = 40000
-                if (perf.audience > 30) {
-                    thisAmount += 1000 * (perf.audience - 30)
-                }
-            }
-            PlayType.COMEDY -> {
-                thisAmount = 30000
-                if (perf.audience > 20) {
-                    thisAmount += 10000 + 500 * (perf.audience - 20)
-                }
-                thisAmount += 300 * perf.audience
-            }
-        }
+        val thisAmount = amountFor(perf, play)
         // add volume credits
         volumeCredits += max(perf.audience - 30, 0)
         // add extra credit for every ten comedy attendees
@@ -38,5 +23,25 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
     }
     result += "Amount owed is ${format.format(totalAmount / 100)}\n"
     result += "You earned $volumeCredits credits\n"
+    return result
+}
+
+private fun amountFor(perf: Performance, play: Play): Int {
+    var result: Int
+    when (play.type) {
+        PlayType.TRAGEDY -> {
+            result = 40000
+            if (perf.audience > 30) {
+                result += 1000 * (perf.audience - 30)
+            }
+        }
+        PlayType.COMEDY -> {
+            result = 30000
+            if (perf.audience > 20) {
+                result += 10000 + 500 * (perf.audience - 20)
+            }
+            result += 300 * perf.audience
+        }
+    }
     return result
 }
