@@ -2,6 +2,13 @@ import java.text.NumberFormat
 import java.util.*
 import kotlin.math.*
 
+data class StatementLine(val playName: String, val amount: Int,
+                         val volumeCredits: Int, val audience: Int) {
+    override fun toString(): String {
+        return " $playName: ${asUSD(amount)} (${audience} seats)"
+    }
+}
+
 fun statement(invoice: Invoice, plays: List<Play>): String {
     var totalAmount = 0
     var volumeCredits = 0
@@ -10,12 +17,11 @@ fun statement(invoice: Invoice, plays: List<Play>): String {
     for(perf in invoice.performances) {
         val play = plays.find { it.id == perf.playID } ?:
             throw Exception("Unknown play: ${perf.playID}")
-        val thisAmount = amountFor(perf, play)
-        // add volume credits
-        volumeCredits += volumeCreditsFor(perf, play)
-        // print line for this order
-        result += " ${play.name}: ${asUSD(thisAmount)} (${perf.audience} seats)\n"
-        totalAmount += thisAmount
+        val statementLine = StatementLine(play.name, amountFor(perf, play),
+                                          volumeCreditsFor(perf, play), perf.audience)
+        volumeCredits += statementLine.volumeCredits
+        result += "$statementLine\n"
+        totalAmount += statementLine.amount
     }
     result += "Amount owed is ${asUSD(totalAmount)}\n"
     result += "You earned $volumeCredits credits\n"
