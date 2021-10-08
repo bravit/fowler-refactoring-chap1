@@ -18,9 +18,9 @@ class TestStatement {
     @Test
     fun `statement on prod data`() {
         val plays = listOf(
-                Play("hamlet", "Hamlet", "tragedy"),
-                Play("as-like", "As You Like it", "comedy"),
-                Play("othello", "Othello", "tragedy")
+                Play("hamlet", "Hamlet", PlayType.TRAGEDY),
+                Play("as-like", "As You Like it", PlayType.COMEDY),
+                Play("othello", "Othello", PlayType.TRAGEDY)
         )
         val invoice = Invoice("BigCo", listOf(
                 Performance("hamlet", 55),
